@@ -1,0 +1,783 @@
+---
+title: "LEADS bivariate analysis - Mentorship"
+author: "Rebecca Voropaeff"
+output: github_document
+---
+
+```{r, echo = FALSE}
+ALL_data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/LEADS Reports/LEADS_all csv.csv")
+
+```
+
+```{r, echo = FALSE}
+###assign factors
+ALL_data$Cohort <- as.factor(ALL_data$Cohort)
+
+```
+
+```{r, echo = FALSE}
+###assign factors
+ALL_data$surveytype <- as.factor(ALL_data$surveytype)
+```
+
+```{r, echo = FALSE}
+###assign factors
+ALL_data$Question <- as.factor(ALL_data$Question)
+
+```
+
+```{r, echo = FALSE}
+###assign factors
+ALL_data$Category <- as.factor(ALL_data$Category)
+```
+
+```{r, echo=FALSE, results='hide'}
+###summary table
+summary(ALL_data)
+```
+
+```{r, echo =FALSE}
+###convert all columns within df to appropriate data types
+ALL_data$SurveyId <- as.factor(ALL_data$SurveyId)
+ALL_data$UserId <- as.factor(ALL_data$UserId)
+ALL_data$Cohort <- as.factor(ALL_data$Cohort)
+ALL_data$SurveyYear <- as.integer(ALL_data$SurveyYear)  
+ALL_data$surveytype <- as.factor(ALL_data$surveytype)
+ALL_data$Question <- as.character(ALL_data$Question)
+ALL_data$Score <- as.numeric(ALL_data$Score)  
+ALL_data$Category <- as.factor(ALL_data$Category)
+```
+
+```{r, echo=FALSE}
+###get variable titles
+unique_question_variables <- unique(ALL_data$Question)
+
+
+```
+
+```{r, echo=FALSE, results='hide'}
+#Count occurrences of each question type
+question_counts <- table(ALL_data$Question)
+```
+
+```{r, echo=FALSE}
+###assign specific order to surveytype
+ALL_data$surveytype <- factor(ALL_data$surveytype, levels = c("Baseline", "Exit", "Alumni"))
+```
+
+```{r, echo=FALSE}
+###assign specific order to categories
+ALL_data$Category <- factor(ALL_data$Category, levels = c("burnout", "creativity", "motivation", "passion_and_interest", "leadership", "rsi", "professionalism", "research_experience", "mentoring", "resources", "networking", "job_satisfaction", "career_satisfaction", "caa"))
+```
+
+```{r, echo=FALSE}
+library(stringr)
+
+```
+
+```{r, echo=FALSE}
+wrap_cat <- function(text, width = 80) 
+  {wrapped_text <- str_wrap(text, width)
+  cat(wrapped_text, "\n")}
+
+```
+
+```{r, echo=FALSE}
+
+wrap_cat("This report observes the potentail impact of mentorship on success factors for LEADS scholars. The outcome X variable of success factors will be compaired against the Y variables 'priaccess' or 'My primary mentor of mentoring team is accessible', and 'prioverall' or 'Please rate the overall effectiveness of your primary mentor.' The data is unaggregated.")
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+```
+
+```{r, echo=FALSE}
+wrap_cat("The LEADS survey has been broken down into subscales that will be assessed in the following order:")
+    
+   cat("
+    Burnout
+    Creativity
+    Motivation
+    Passion and Interests
+    Leadership
+    Research Skills Inventory
+    Professionalism
+    Research Experience
+    Networking/Socail Capital
+    Job Satisfaction
+    Career Satisfaction
+    Career Adapt-Abilities Inventory")
+```
+
+```{r, echo=FALSE, results='hide'}
+suppressPackageStartupMessages(library(dplyr))
+
+library(dplyr)
+###Create a descriptive table for the burnout category grouped by SurveyType
+burnout_summary <- ALL_data %>%
+  filter(Category == "burnout") %>%
+  group_by(surveytype) %>%  
+  summarise(
+    Count = n(),
+    Mean = mean(Score, na.rm = TRUE),
+    Median = median(Score, na.rm = TRUE),
+    SD = sd(Score, na.rm = TRUE),
+    Min = min(Score, na.rm = TRUE),
+    Max = max(Score, na.rm = TRUE),
+      .groups = 'drop'  # To avoid a grouped data frame output
+  )
+
+print(burnout_summary)
+
+```
+
+```{r, echo=FALSE}
+
+library(knitr)
+
+```
+
+```{r, echo=FALSE}
+# Define a vector of specific question variables
+question_variables <- c("activerole", "actoninfo", "adaptability", "agencies", "arguments", "assembleTeam", "assistcolleague", "avoidoffensive", "awareChoices", "beliefs", "buildcomm", "buildplan", "burnout", "careerConcern", "coaching",  "communications", "compensation", "compsupervisor", "countOnSelf", "creative", "creativeperson", "criticism", "critiques", "curious", "dataManager", "deepProbing", "diffangles", "differentWays", "direction", "discloseCOI", "doThingsWell", "dynamics", "efficient", "finer", "finish", "followupplan", "grantStages","grantWriter", "hypothesis", "influenced", "jobmeaningful", "launch", "learnSkills", "likecoworkers", "listen", "lookToGrow", "manageTeam", "mentorExpertise", "newdistract", "newskills", "notblocked", "notdiscouraged", "optionsPrechoice", "overcome", "paidfair", "peerReviewer", "planToAchieve", "prepareFuture", "priaccess", "pricareerresp", "pricritiq", "prilife", "primotiv", 
+"prioverall", "priprof", "priskills", "prisuggestinfl", "recognition", "reschange", "researchAdmin", "respect", "responsible", "rightForSelf", "sections", "secureMore", "selfDecisions", "shapeFuture", "showtrust", "sofield", "solveProblems", "soother", "sopitt", "statistician", "submitGrant", "surroundings", "theoretical", 
+"thinkFuture", "timeline", "truthful", "upbeat", "wkbetter", "wkcomplex", "wkdiffic", "wkenjoy", "wkincome", "wkmostej", "wkothfind", "wkprom", "wkrecogn", 
+"wktackl", "workingUp", "writeAbstract", "writeMOP", "writePaper") 
+```
+
+```{r, echo=FALSE, message=FALSE, fig.show='hide'}
+library(ggplot2)
+library(dplyr)
+
+create_scatter_plot_mean <- function(x_question, y_question) {
+  # Check for questions in the dataframe
+  if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+  if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+  
+  # Prepare data
+  x_data <- ALL_data %>% 
+    filter(Question == x_question) %>% 
+    select(SurveyId, UserId, surveytype, Score) %>% 
+    rename(Score_x = Score)
+
+  y_data <- ALL_data %>% 
+    filter(Question == y_question) %>% 
+    select(SurveyId, UserId, Score) %>% 
+    rename(Score_y = Score)
+  
+  # Join data on SurveyId and UserId
+  plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+  
+  # Calculate mean of Score_x and count by surveytype and Score_y
+  plot_counts <- plot_data %>%
+    group_by(surveytype, Score_y) %>%
+    summarise(Mean_x = mean(Score_x, na.rm = TRUE), 
+              Count = n(), 
+              .groups = 'drop')  # Count occurrences
+
+  # Filter out rows with NA values in Mean_x or Score_y
+  plot_counts <- plot_counts %>%
+    filter(!is.na(Mean_x) & !is.na(Score_y))
+
+  # Define nudge distances
+  nudge_x <- 0.15  # Horizontal spacing
+  nudge_y <- 0.1   # Vertical spacing
+  
+  # Create scatter plot with nudge to maintain symmetry
+  plot <- suppressWarnings({
+    ggplot(plot_counts, aes(x = Mean_x, y = Score_y, color = surveytype)) +
+      geom_point(aes(size = Count), alpha = 0.5, 
+                 position = position_nudge(x = nudge_x, y = nudge_y), na.rm = TRUE) +  # Nudge for spacing
+      labs(title = paste("Scatter Plot of", x_question, "Mean vs", y_question, "Raw Scores by Survey Type"),
+           x = paste("Mean of", x_question),
+           y = y_question,
+           size = "Count") +  # Label for size legend
+      theme_minimal()
+  })
+
+  print(plot)
+  
+  # Optionally save the plot, suppressing messages
+  suppressMessages({
+    ggsave(filename = paste0(x_question, "_vs_", y_question, "_scatter_plot_by_surveytype.png"), plot = plot)
+  })
+}
+
+# Example usage
+create_scatter_plot_mean("burnout", "priaccess")
+
+
+```
+
+```{r, echo=FALSE}
+cat("Burnout")
+
+```
+
+```{r, echo=FALSE, results='hide'}
+kable(burnout_summary)
+```
+
+```{r, echo=FALSE, results='hide'}
+library(ggplot2)
+library(dplyr)
+
+create_scatter_plot_raw <- function(x_question, y_question) {
+  # Check for questions in the dataframe
+  if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+  if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+  
+  # Prepare data for x_question
+  x_data <- ALL_data %>% 
+    filter(Question == x_question) %>% 
+    select(SurveyId, UserId, surveytype, Score) %>% 
+    rename(Score_x = Score)
+
+  # Prepare data for y_question
+  y_data <- ALL_data %>% 
+    filter(Question == y_question) %>% 
+    select(SurveyId, UserId, Score) %>% 
+    rename(Score_y = Score)
+
+  # Join data on SurveyId and UserId
+  plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+  
+  # Filter out rows with NA values
+  plot_data <- plot_data %>% filter(!is.na(Score_x) & !is.na(Score_y))
+
+  # Calculate counts for each combination of raw scores
+  plot_counts <- plot_data %>%
+    group_by(surveytype, Score_x, Score_y) %>%
+    summarise(Count = n(), .groups = 'drop')  # Count occurrences
+  
+  # Remove rows with zero counts to avoid warnings
+  plot_counts <- plot_counts %>%
+    filter(Count > 0)
+
+  # Create scatter plot with jitter to avoid overlap
+  plot <- suppressWarnings({
+    ggplot(plot_counts, aes(x = Score_x, y = Score_y, color = surveytype)) +
+      geom_jitter(aes(size = Count), width = 0.1, height = 0.3, alpha = 0.5, na.rm = TRUE) +  # Use jitter for points
+      labs(title = paste( x_question, "vs", y_question),
+           x = paste( x_question),
+           y = paste(y_question),
+           size = "Count") +  # Label for size legend
+      theme_minimal() +
+      theme(legend.position = "right")  # Adjust legend position as needed
+  })
+
+  # Print the plot
+  suppressWarnings(print(plot))
+  
+  # Optionally save the plot, suppressing messages
+  suppressMessages({
+    ggsave(filename = paste0(x_question, "_vs_", y_question, "_scatter_plot_by_surveytype.png"), plot = plot)
+  })
+}
+
+
+```
+
+```{r, echo=FALSE, fig.show='hide', results='hide', message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+
+create_scatter_plot_all <- function(x_question, y_question) {
+  # Check for questions in the dataframe
+  if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+  if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+  
+  # Prepare data for x_question
+  x_data <- ALL_data %>% 
+    filter(Question == x_question) %>% 
+    select(SurveyId, UserId, Score) %>% 
+    rename(Score_x = Score)
+
+  # Prepare data for y_question
+  y_data <- ALL_data %>% 
+    filter(Question == y_question) %>% 
+    select(SurveyId, UserId, Score) %>% 
+    rename(Score_y = Score)
+
+  # Join data on SurveyId and UserId
+  plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+  
+  # Filter out rows with NA values
+  plot_data <- plot_data %>% filter(!is.na(Score_x) & !is.na(Score_y))
+
+  # Calculate counts for each combination of raw scores
+  plot_counts <- plot_data %>%
+    group_by(Score_x, Score_y) %>% 
+    summarise(Count = n(), .groups = 'drop') 
+  
+  # Remove rows with zero counts to avoid warnings
+  plot_counts <- plot_counts %>%
+    filter(Count > 0)
+
+  # Get n values
+  n_x <- nrow(x_data)
+  n_y <- nrow(y_data)
+
+  # Create scatter plot without jitter
+  plot <- ggplot(plot_counts, aes(x = Score_x, y = Score_y)) +  
+    geom_point(aes(size = Count), alpha = 0.3) +  # Use points instead of jitter
+    geom_text(aes(label = Count), hjust = -1.0, size = 3, color = "black") +  # Adjust position to the right
+    labs(title = paste(x_question, "vs", y_question, "| n_x =", n_x, ", n_y =", n_y),
+         x = paste(x_question),
+         y = paste(y_question),
+         size = "Count") +  
+    theme_minimal() +
+    theme(legend.position = "right", plot.title = element_text(hjust = 0.7))  # Center the title
+
+  # Print the plot
+  print(plot)
+  
+  # Optionally save the plot
+  ggsave(filename = paste0(x_question, "_vs_", y_question, "_scatter_plot.png"), plot = plot)  
+}
+
+# Example usage
+create_scatter_plot_all("burnout", "priaccess")
+
+```
+
+```{r, echo=FALSE}
+######create function scatter plot two all
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(dplyr)
+  library(gridExtra)  # Load gridExtra for arranging plots
+  library(grid)       # Load grid for textGrob
+})
+
+create_scatter_plot_two_all <- function(x_question1, y_question1, x_question2, y_question2, 
+                                         x_limits = c(1, 5), y_limits = c(1, 5),  # Add parameters for axis limits
+                                         main_title = "", title_size = 10, label_size = 8, text_label_size = 2.6) {
+  # Function to create a scatter plot
+  create_plot <- function(x_question, y_question, color) {
+    if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+    if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+    
+    # Prepare data for x_question
+    x_data <- ALL_data %>% 
+      filter(Question == x_question) %>% 
+      select(SurveyId, UserId, Score) %>% 
+      rename(Score_x = Score)
+
+    # Prepare data for y_question
+    y_data <- ALL_data %>% 
+      filter(Question == y_question) %>% 
+      select(SurveyId, UserId, Score) %>% 
+      rename(Score_y = Score)
+
+    # Join data on SurveyId and UserId
+    plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+    
+    # Filter out rows with NA values
+    plot_data <- plot_data %>% filter(!is.na(Score_x) & !is.na(Score_y))
+
+    # Calculate counts for each combination of raw scores
+    plot_counts <- plot_data %>%
+      group_by(Score_x, Score_y) %>% 
+      summarise(Count = n(), .groups = 'drop') 
+    
+    # Remove rows with zero counts to avoid warnings
+    plot_counts <- plot_counts %>%
+      filter(Count > 0)
+
+    # Get n values
+    n_x <- nrow(x_data)
+    n_y <- nrow(y_data)
+
+    # Create scatter plot without jitter for points, jittering only text labels
+    plot <- suppressWarnings({
+      ggplot(plot_counts, aes(x = Score_x, y = Score_y)) +  
+        geom_point(aes(size = Count), color = color, alpha = 0.2) +  # Set color based on argument
+        geom_text(aes(label = Count), 
+                  position = position_jitter(width = 0.0, height = 0.0),  # Apply jitter to text labels
+                  size = text_label_size, color = "black") +  
+        labs(title = paste(x_question, "vs", y_question, "\n", 
+                           "n_x =", n_x, ", n_y =", n_y),
+             x = paste(x_question),
+             y = paste(y_question),
+             size = "Count") +  
+        scale_size_continuous(limits = c(1, 100), range = c(1, 25), guide = "none") +  # Lock sizes
+        scale_x_continuous(limits = x_limits) +  # Set x-axis limits
+        scale_y_continuous(limits = y_limits) +  # Set y-axis limits
+        theme_minimal() +
+        theme(legend.position = "right", 
+              plot.title = element_text(hjust = 0.5, size = title_size, lineheight = 0.8),
+              axis.text.x = element_text(size = label_size, face = "bold"),  # Bold x-axis numbers
+              axis.text.y = element_text(size = label_size, face = "bold"),  # Bold y-axis numbers
+              axis.title.x = element_text(size = label_size),  # Normal x-axis title
+              axis.title.y = element_text(size = label_size),  # Normal y-axis title
+              aspect.ratio = 1)  # Set aspect ratio to 1
+    })
+
+    return(plot)
+  }
+
+  # Create the two plots with specified colors
+  plot1 <- create_plot(x_question1, y_question1, color = "blue")
+  plot2 <- create_plot(x_question2, y_question2, color = "black")
+
+  # Arrange the plots side by side with adjusted heights for equal aspect ratio
+  grid.arrange(plot1, plot2, ncol = 2, 
+               top = textGrob(main_title, gp = gpar(fontsize = 14, fontface = "bold")))  # Use main_title here
+}
+
+# Example usage with customizable main title and axis limits
+create_scatter_plot_two_all("burnout", "priaccess", "burnout", "prioverall", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I am experiencing symptoms of burnout.")
+```
+
+```{r, echo=FALSE}
+wrap_cat("As priaccess scores are higher, burnout scores are lower. On this scale, a lower burnout score is positive.")
+
+```
+
+```{r, echo=FALSE, fig.show='hide', warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)  # Load gridExtra for arranging plots
+
+create_scatter_plot_both <- function(x_question, y_question, title_size = 14, axis_size = 12, legend_size = 10) {
+  # Check for questions in the dataframe
+  if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+  if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+  
+  # Prepare data for x_question, including surveytype
+  x_data <- ALL_data %>% 
+    filter(Question == x_question) %>% 
+    select(SurveyId, UserId, surveytype, Score) %>% 
+    rename(Score_x = Score)
+
+  # Prepare data for y_question, without surveytype
+  y_data <- ALL_data %>% 
+    filter(Question == y_question) %>% 
+    select(SurveyId, UserId, Score) %>% 
+    rename(Score_y = Score)
+
+  # Join data on SurveyId and UserId
+  plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+  
+  # Filter out rows with NA values
+  plot_data <- plot_data %>% filter(!is.na(Score_x) & !is.na(Score_y))
+
+  # Calculate counts for each combination of raw scores
+  plot_counts_surveytype <- plot_data %>%
+    group_by(surveytype, Score_x, Score_y) %>%
+    summarise(Count = n(), .groups = 'drop')  # Count occurrences
+
+  plot_counts_all <- plot_data %>%
+    group_by(Score_x, Score_y) %>%  # No surveytype grouping
+    summarise(Count = n(), .groups = 'drop')
+
+  # Remove rows with zero counts to avoid warnings
+  plot_counts_surveytype <- plot_counts_surveytype %>% filter(Count > 0)
+  plot_counts_all <- plot_counts_all %>% filter(Count > 0)
+
+  # Create scatter plots
+  plot1 <- ggplot(plot_counts_surveytype, aes(x = Score_x, y = Score_y)) + 
+    geom_jitter(aes(size = Count, color = surveytype), 
+                width = 0.3, height = 0.3, alpha = 0.3, na.rm = TRUE) +  
+    labs(title = paste(x_question, "vs", y_question),
+         x = x_question,
+         y = y_question) +  
+    scale_size_continuous(limits = c(1, 60), range = c(1, 10), guide = "none") +  # Remove count legend
+    scale_color_discrete(name = NULL) +  # Remove color legend title
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      aspect.ratio = 1,
+      plot.title = element_text(size = title_size),  # Title size
+      axis.title.x = element_text(size = axis_size),  # X-axis label size
+      axis.title.y = element_text(size = axis_size),  # Y-axis label size
+      legend.text = element_text(size = legend_size),   # Legend text size
+      legend.spacing.y = unit(0, "pt")  # Remove space between surveytype and count
+    )
+
+  plot2 <- ggplot(plot_counts_all, aes(x = Score_x, y = Score_y)) + 
+    geom_jitter(aes(size = Count), 
+                width = 0.5, height = 0.3, alpha = 0.5, na.rm = TRUE) +  
+    labs(title = paste(x_question, "vs", y_question),
+         x = x_question,
+         y = y_question) +  
+    scale_size_continuous(limits = c(1, 60), range = c(1, 10)) +  
+    scale_color_discrete(name = NULL) +  # Remove color legend title
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      aspect.ratio = 1,
+      plot.title = element_text(size = title_size),  # Title size
+      axis.title.x = element_text(size = axis_size),  # X-axis label size
+      axis.title.y = element_text(size = axis_size),  # Y-axis label size
+      legend.text = element_text(size = legend_size)   # Legend text size
+    )
+
+  # Arrange the plots side by side
+  grid.arrange(plot1, plot2, ncol = 2)
+  
+  # Optionally save the plots as separate images
+  suppressMessages({
+    ggsave(filename = paste0(x_question, "_vs_", y_question, "_scatter_plot_by_surveytype.png"), plot = plot1, width = 8, height = 8)  # Adjust width and height for 2:2 ratio
+    ggsave(filename = paste0(x_question, "_vs_", y_question, "_scatter_plot_all.png"), plot = plot2, width = 8, height = 8)  # Adjust width and height for 2:2 ratio
+  })
+}
+
+# Example usage
+create_scatter_plot_both("burnout", "priaccess", title_size = 10, axis_size = 9, legend_size = 8)
+
+
+
+
+```
+
+```{r, echo=FALSE}
+Question_LookUp_Professionalism <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/LEADS Reports/Question Look-Up Professionalism.csv")
+```
+
+```{r, echo=FALSE}
+cat("Creativity")
+```
+
+```{r, echo=FALSE}
+
+create_scatter_plot_two_all("creativeperson", "priaccess", "creativeperson", "prioverall", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I am a creative person.") 
+                             
+```
+
+```{r, echo=FALSE}
+cat("Motivation")
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkrecogn", "priaccess", "wkrecogn", "prioverall",
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I am strongly motivated by the recognition I earn from other people.") 
+                             
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkothfind", "priaccess", "wkothfind", "prioverall", 
+                            x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I want other people to find out how good I can really be at my work.") 
+                             
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkbetter", "priaccess", "wkbetter", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "To me, success means doing better than other people.") 
+                             
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkprom", "priaccess", "wkprom", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I am keenly aware of the promotion goals I have for myself.") 
+                  
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkincome", "priaccess", "wkincome", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I am keenly aware of the income goals I have for myself.") 
+                  
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkmostej", "priaccess", "wkmostej", "prioverall",
+                            x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "It is important for me to be able to do what I most enjoy.") 
+                  
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wktackl", "priaccess", "wktackl", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I enjoy tackling problems that are completely new to me.") 
+                  
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkcomplex", "priaccess", "wkcomplex", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "I enjoy trying to solve complex problems.") 
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkdiffic", "priaccess", "wkdiffic", "prioverall", 
+                             x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "The more difficult the problem, the more I enjoy trying to solve it.") 
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("wkenjoy", "priaccess", "wkenjoy", "prioverall", 
+                            x_limits = c(0, 3), y_limits = c(1, 5),
+                             main_title = "What matters most to me is enjoying what I do.") 
+```
+
+```{r, echo=FALSE}
+cat("Passion and Interests")
+
+```
+
+```{r, echo=FALSE}
+cat("Leadership")
+
+```
+
+```{r, echo=FALSE}
+cat("Research Skills Inventory")
+
+```
+
+```{r, echo=FALSE}
+kable(Question_LookUp_Professionalism) 
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("adaptability", "priaccess", "adaptability", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I demonstrate adaptability in responding to changing needs and priorities.") 
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("criticism", "priaccess", "criticism", "prioverall",
+                            
+ x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I respond well to constructive criticism.") 
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("assistcolleague", "priaccess", "assistcolleague", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I offer assistance toward a colleagues\n professional and personal development." )
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("respect", "priaccess", "respect", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = " I always respect the rights and\n individuality of thought by colleagues and students." )
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("truthful", "priaccess", "truthful", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = " I always represent information and actions in a truthful way." )
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("discloseCOI", "priaccess", "discloseCOI", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I disclose conflicts of interest in\n the course of professional duties and activities." )
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("avoidoffensive", "priaccess", "avoidoffensive", "prioverall",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "I avoid offensive speech that offers\n unkind comments and unfair criticisms to others.")
+
+```
+
+```{r, echo=FALSE}
+cat("For Professionalism, X increases as Y increases.")
+
+```
+
+```{r, echo=FALSE}
+cat("Research Expereince")
+```
+
+```{r, echo=FALSE}
+cat("Networking and Social Capital")
+```
+
+```{r, echo=FALSE}
+Question_LookUp_JobSat <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/LEADS Reports/Question Look-Up Job Sat.csv")
+```
+
+```{r, echo=FALSE}
+cat("Job satisfaction variable key")
+
+```
+
+```{r, echo=FALSE}
+kable(Question_LookUp_JobSat)
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("paidfair", "priaccess", "paidfair", "prioverall",
+                            x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "I feel I am being paid a fair amount for the work I do.")
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("compsupervisor", "priaccess", "compsupervisor", "prioverall",
+                                       x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "My supervisor is quite competent in doing his/her job.")
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("recognition", "priaccess", "recognition", "prioverall",
+                             x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "When I do a good job, I receive the recognition for it that I should receive.")
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("notblocked", "priaccess", "notblocked", "prioverall",
+                            x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = " My efforts to do a good job are seldom blocked\n by the rules and procedures of my institution.")
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("likecoworkers", "priaccess", "likecoworkers", "prioverall",
+                              x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "I like the people I work with.")
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("jobmeaningful", "priaccess", "jobmeaningful", "prioverall",
+                            x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "I feel my job is meaningful.")
+
+```
+
+```{r, echo=FALSE}
+create_scatter_plot_two_all("communications", "priaccess", "communications", "prioverall",
+                            x_limits = c(1, 7), y_limits = c(1, 5),
+                             main_title = "Communications are good within this organization.")
+
+
+```
+
+```{r, echo=FALSE}
+cat("Career Satisfaction")
+```
+
+```{r, echo=FALSE}
+cat("Career Adapt-Abilities")
+```

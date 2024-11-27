@@ -1,0 +1,7 @@
+export("ALL_data", "anova_result", "burnout_data", "burnout_summary", "combined_plot",
+       "create_scatter_plot", "create_scatter_plot_all", "create_scatter_plot_both",
+       "create_scatter_plot_mean", "create_scatter_plot_raw", "create_scatter_plot_regression",
+       "create_scatter_plot_two_all", "loadedPackages", "plot1", "plot2", "plot3", "plot4",
+       "question_counts", "Question_LookUp_JobSat", "Question_LookUp_Professionalism",
+       "question_variables", "suppress_geom_smooth_messages", "unique_question_variables",
+       "weighted_regression", "wrap_cat")

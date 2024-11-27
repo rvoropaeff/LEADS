@@ -1,0 +1,818 @@
+---
+title: "LEADS Bivariate Analysis - Mentorship"
+author: "Rebecca Voropaeff"
+date: "2024-10-08"
+output: github_document
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+<!-- insert LEADS logo -->
+
+```{r, echo=FALSE, fig.align='center'}
+knitr::include_graphics("C:/Users/REV47/OneDrive - University of Pittsburgh/Pictures/Screenshots/Screenshot 2024-10-08 122720.png")
+```
+
+<!-- Load the data from the specified CSV file -->
+
+```{r, echo=FALSE}
+ALL_data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/LEADS Reports/LEADS_all csv.csv")
+```
+
+<!-- assign factors -->
+
+```{r, echo = FALSE}
+ALL_data$Cohort <- as.factor(ALL_data$Cohort)
+ALL_data$surveytype <- as.factor(ALL_data$surveytype)
+ALL_data$Question <- as.factor(ALL_data$Question)
+ALL_data$Category <- as.factor(ALL_data$Category)
+```
+
+<!-- convert all columns within df to appropriate data types -->
+
+```{r, echo =FALSE}
+ALL_data$SurveyId <- as.factor(ALL_data$SurveyId)
+ALL_data$UserId <- as.factor(ALL_data$UserId)
+ALL_data$Cohort <- as.factor(ALL_data$Cohort)
+ALL_data$SurveyYear <- as.integer(ALL_data$SurveyYear)  
+ALL_data$surveytype <- as.factor(ALL_data$surveytype)
+ALL_data$Question <- as.character(ALL_data$Question)
+ALL_data$Score <- as.numeric(ALL_data$Score)  
+ALL_data$Category <- as.factor(ALL_data$Category)
+```
+
+<!-- assign specific order to surveytype -->
+
+```{r, echo=FALSE}
+ALL_data$surveytype <- factor(ALL_data$surveytype, levels = c("Baseline", "Exit", "Alumni"))
+```
+
+<!-- assign specific order to categories -->
+
+```{r, echo=FALSE}
+ALL_data$Category <- factor(ALL_data$Category, levels = c("burnout", "creativity", "motivation", "passion_and_interest", "leadership", "rsi", "professionalism", "research_experience", "mentoring", "resources", "networking", "job_satisfaction", "career_satisfaction", "caa"))
+```
+
+```{r, echo=FALSE}
+library(stringr)
+```
+
+This report observes the potential impact of mentorship on success factors for LEADS scholars. The outcome Y variables of success factors will be compared against the X variables *'priaccess'* or *'My primary mentor of mentoring team is accessible'*, and *'prioverall'* or *'Please rate the overall effectiveness of your primary mentor.'* The data is unaggregated.
+
+The LEADS survey has been broken down into subscales that will be assessed in the tabs belows.
+
+<!-- Load library for regression power analysis -->
+
+```{r setup, include=FALSE}
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(dplyr)
+  library(pwr)  # For power analysis
+})
+```
+
+```{r, echo=FALSE}
+# Assuming ALL_data is your original data frame
+
+# Filter the data for the specific questions
+priaccess <- ALL_data %>%
+  filter(Question == "priaccess") %>%
+  select(SurveyId, UserId, Score) %>%
+  rename(priaccess = Score)
+
+burnout <- ALL_data %>%
+  filter(Question == "burnout") %>%
+  select(SurveyId, UserId, Score) %>%
+  rename(burnout = Score)
+
+# Combine the two data frames on SurveyId and UserId
+plot_data <- inner_join(priaccess, burnout, by = c("SurveyId", "UserId"))
+
+# Filter out rows with NA values
+plot_data <- plot_data %>%
+  filter(!is.na(priaccess) & !is.na(burnout))
+```
+
+
+
+
+
+
+
+<!-- Define a vector of specific question variables -->
+
+```{r, echo=FALSE}
+question_variables <- c("activerole", "actoninfo", "adaptability", "agencies", "arguments", "assembleTeam", "assistcolleague", "avoidoffensive", "awareChoices", "beliefs", "buildcomm", "buildplan", "burnout", "careerConcern", "coaching",  "communications", "compensation", "compsupervisor", "countOnSelf", "creative", "creativeperson", "criticism", "critiques", "curious", "dataManager", "deepProbing", "diffangles", "differentWays", "direction", "discloseCOI", "doThingsWell", "dynamics", "efficient", "finer", "finish", "followupplan", "grantStages","grantWriter", "hypothesis", "influenced", "jobmeaningful", "launch", "learnSkills", "likecoworkers", "listen", "lookToGrow", "manageTeam", "mentorExpertise", "newdistract", "newskills", "notblocked", "notdiscouraged", "optionsPrechoice", "overcome", "paidfair", "peerReviewer", "planToAchieve", "prepareFuture", "priaccess", "pricareerresp", "pricritiq", "prilife", "primotiv", 
+"prioverall", "priprof", "priskills", "prisuggestinfl", "recognition", "reschange", "researchAdmin", "respect", "responsible", "rightForSelf", "sections", "secureMore", "selfDecisions", "shapeFuture", "showtrust", "sofield", "solveProblems", "soother", "sopitt", "statistician", "submitGrant", "surroundings", "theoretical", 
+"thinkFuture", "timeline", "truthful", "upbeat", "wkbetter", "wkcomplex", "wkdiffic", "wkenjoy", "wkincome", "wkmostej", "wkothfind", "wkprom", "wkrecogn", 
+"wktackl", "workingUp", "writeAbstract", "writeMOP", "writePaper") 
+```
+
+## scatterplots {.tabset .tabset-pills}
+
+### Burnout
+
+<center>Burnout, shown on the y-axis, is measured on a Likert Scale of 1 to 5, where 1 = None, 2 = Some Stress, 3 = Onset, 4 = Persistence, and 5 = Severe. In this case, low scores indicate a positive result.</center>
+
+<!-- create function scatter plot two all -->
+
+```{r, echo=FALSE, fig.align = 'center'}
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(dplyr)
+  library(gridExtra)  # Load gridExtra for arranging plots
+  library(grid)       # Load grid for textGrob
+})
+
+create_scatter_plot_two_all <- function(x_question1, y_question1, x_question2, y_question2, 
+                                         x_limits = c(1, 5), y_limits = c(1, 5),  # Add parameters for axis limits
+                                         main_title = "", title_size = 10, label_size = 8, text_label_size = 2.6) {
+  # Function to create a scatter plot
+  create_plot <- function(x_question, y_question, color) {
+    if (!(x_question %in% ALL_data$Question)) stop("X-axis question not found.")
+    if (!(y_question %in% ALL_data$Question)) stop("Y-axis question not found.")
+    
+    # Prepare data for x_question
+    x_data <- ALL_data %>% 
+      filter(Question == x_question) %>% 
+      select(SurveyId, UserId, Score) %>% 
+      rename(Score_x = Score)
+
+    # Prepare data for y_question
+    y_data <- ALL_data %>% 
+      filter(Question == y_question) %>% 
+      select(SurveyId, UserId, Score) %>% 
+      rename(Score_y = Score)
+
+    # Join data on SurveyId and UserId
+    plot_data <- inner_join(x_data, y_data, by = c("SurveyId", "UserId")) 
+    
+    # Filter out rows with NA values
+    plot_data <- plot_data %>% filter(!is.na(Score_x) & !is.na(Score_y))
+
+    # Calculate counts for each combination of raw scores
+    plot_counts <- plot_data %>%
+      group_by(Score_x, Score_y) %>% 
+      summarise(Count = n(), .groups = 'drop') 
+    
+    # Remove rows with zero counts to avoid warnings
+    plot_counts <- plot_counts %>%
+      filter(Count > 0)
+
+    # Get n values
+    n_x <- nrow(x_data)
+    n_y <- nrow(y_data)
+
+    # Create scatter plot without jitter for points, jittering only text labels
+    plot <- suppressWarnings({
+      ggplot(plot_counts, aes(x = Score_x, y = Score_y)) +  
+        geom_point(aes(size = Count), color = color, alpha = 0.2) +  # Set color based on argument
+        geom_text(aes(label = Count), 
+                  position = position_jitter(width = 0.0, height = 0.0),  # Apply jitter to text labels
+                  size = text_label_size, color = "black") +  
+        labs(title = paste(x_question, "vs", y_question, "\n", 
+                           "n_x =", n_x, ", n_y =", n_y),
+             x = paste(x_question),
+             y = paste(y_question),
+             size = "Count") +  
+        scale_size_continuous(limits = c(1, 100), range = c(1, 25), guide = "none") +  # Lock sizes
+        scale_x_continuous(limits = x_limits) +  # Set x-axis limits
+        scale_y_continuous(limits = y_limits) +  # Set y-axis limits
+        theme_minimal() +
+        theme(legend.position = "right", 
+              plot.title = element_text(hjust = 0.5, size = title_size, lineheight = 0.8),
+              axis.text.x = element_text(size = label_size, face = "bold"),  # Bold x-axis numbers
+              axis.text.y = element_text(size = label_size, face = "bold"),  # Bold y-axis numbers
+              axis.title.x = element_text(size = label_size),  # Normal x-axis title
+              axis.title.y = element_text(size = label_size),  # Normal y-axis title
+              aspect.ratio = 1)  # Set aspect ratio to 1
+    })
+
+    return(plot)
+  }
+
+  # Create the two plots with specified colors
+  plot1 <- create_plot(x_question1, y_question1, color = "blue")
+  plot2 <- create_plot(x_question2, y_question2, color = "black")
+
+  # Arrange the plots side by side with adjusted heights for equal aspect ratio
+  grid.arrange(plot1, plot2, ncol = 2, 
+               top = textGrob(main_title, gp = gpar(fontsize = 14, fontface = "bold")))  # Use main_title here
+}
+
+# Example usage with customizable main title and axis limits
+create_scatter_plot_two_all("priaccess", "burnout", "prioverall", "burnout",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "9. I am experiencing symptoms of burnout.")
+
+```
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+### Creativity
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wkincome", "prioverall", "wkincome",
+                             x_limits = c(1, 5), y_limits = c(0, 3),
+                             main_title = "15. I am keenly aware of the income goals I have for myself.") 
+                  
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wkmostej", "prioverall", "wkmostej",
+                            x_limits = c(1, 5), y_limits = c(0, 3),
+                             main_title = "16. It is important for me to be able to do what I most enjoy.") 
+                  
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wktackl", "prioverall", "wktackl", 
+                             x_limits = c(1, 5), y_limits = c(0, 3),
+                             main_title = "17. I enjoy tackling problems that are completely new to me.") 
+                  
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wkcomplex", "prioverall", "wkcomplex",
+                             x_limits = c(1, 5), y_limits = c(0, 3),
+                             main_title = "18. I enjoy trying to solve complex problems.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wkdiffic", "prioverall", "wkdiffic",
+                             x_limits = c(1, 5), y_limits = c(0, 3),
+                             main_title = "19. The more difficult the problem, the more I enjoy trying to solve it.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "wkenjoy", "prioverall", "wkenjoy",
+                            x_limits = c(1, 5), y_limits = c(0, 3), 
+                            main_title = "20. What matters most to me is enjoying what I do.")
+```
+
+### Passion and Interests
+
+<center>Passion and Interest variables on the y-axis are measured on a Likert Scale of 1 to 5, where 1 = Not at all, 2 = A little, 3 = Neutral, 4 = A lot, 5 = Very Much.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "newdistract", "prioverall", "newdistract",
+                            x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "21. New ideas and projects sometimes distract me from previous ones.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "finish", "prioverall", "finish",
+                            x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "22. I finish whatever I begin.")  
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "notdiscouraged", "prioverall", "notdiscouraged",
+                            x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "23. Setbacks don't discourage me.")
+```
+
+### Leadership
+
+<center>Leadership variables on the y-axis are measured on a Likert Scale of 1 to 7, where 1 = Seldom and 7 = Almost Always.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "actoninfo", "prioverall", "actoninfo",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "24. I encourage people to act on information rather than assumptions.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "diffangles", "prioverall", "diffangles",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "25. I look at the perceived problem from different angles before proceeding.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "buildplan", "prioverall", "buildplan",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "26. I build an action plan with timelines and assigned\n responsibilities to enable the community vision to
+be achieved.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "followupplan", "prioverall", "followupplan",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "27. I follow up on action plans to ensure completion.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "buildcomm", "prioverall", "buildcomm",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "28. I build communication that makes\n it safe for people to say what is on their minds.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "showtrust", "prioverall", "showtrust",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "29. I demonstrate to my peers that I believe that\n trust is the foundation for successful collaboration.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "activerole", "prioverall", "activerole",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "30. I offer people an active role in\n decision making about matters that affect them.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "influenced", "prioverall", "influenced",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "31. I am open to being influenced by others.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "coaching", "prioverall", "coaching",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "32. I take seriously my responsibility for coaching and mentoring others.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "newskills", "prioverall", "newskills",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "33. I help people take advantage of opportunities to learn new skills.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "dynamics", "prioverall", "dynamics",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "34. I recognize my personal impact on group dynamics.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "listen", "prioverall", "listen",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "35. I listen to others actively, checking to ensure my understanding.")
+```
+
+### Research Skills Inventory
+
+<center>Research Skills Inventory variables on the y-axis are measured on a Likert Scale of 0 to 10. Scholars were asked: Please indicate your ability to successfully perform each task by selecting a single number from 0 – 10 that best describes your level of confidence. We would like to know how confident you are that you can successfully perform these tasks TODAY where 0 = No confidence, 10 = Total confidence.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "assembleTeam", "prioverall", "assembleTeam",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "38. Assemble an interdisciplinary,\n transdisciplinary, or multidisciplinary research team.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "manageTeam", "prioverall", "manageTeam",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "39. Manage an interdisciplinary,\n transdisciplinary or multidisciplinary research team.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "arguments", "prioverall", "arguments",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "40. Critically evaluate arguments.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "creative", "prioverall", "creative",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "41. Approach research problems creatively.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "identify", "prioverall", "identify",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "42. Identify a significant research problem.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "launch", "prioverall", "launch",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "43. Launch a research project.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "theoretical", "prioverall", "theoretical",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "44. Distinguish between a theoretical and conceptual model.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "finer", "prioverall", "finer",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "45. Develop a research question using FINER criteria.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "hypothesis", "prioverall", "hypothesis",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "46. Develop a hypothesis based on your research question.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "identify", "prioverall", "identify",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "47. Identify the sections of a scientific research paper.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "writeAbstract", "prioverall", "writeAbstract",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "48. Write a compelling abstract for a scientific paper.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "writePaper", "prioverall", "writePaper",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "49. Write a scientific research paper.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "grantStages", "prioverall", "grantStages",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "50. Identify the stages of the grant writing and review process.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "identify", "prioverall", "identify",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "51. Identify appropriate funding agencies for your research.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "submitGrant", "prioverall", "submitGrant",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "52. Submit a competitive grant application.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "critiques", "prioverall", "critiques",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "53. Respond to reviewer critiques of a manuscript.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "peerReviewer", "prioverall", "peerReviewer",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "54. Describe the roles and responsibilities of a peer reviewer.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "timeline", "prioverall", "timeline",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "55. Develop a timeline for completing a research project.") 
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "writeMOP", "prioverall", "writeMOP",
+                             x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "56. Write a manual of procedures\n (or equivalent document) for a research project.") 
+```
+
+### Professionalism
+
+<center>Professionalism variables on the y-axis are measured on a Likert Scale of 1 to 5, where 1 = Never and 5 = A great deal.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "adaptability", "prioverall", "adaptability",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "59. I demonstrate adaptability in responding\n to changing needs and priorities.") 
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "criticism", "prioverall", "criticism",
+                            
+ x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "60. I respond well to constructive criticism.") 
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "assistcolleague", "prioverall", "assistcolleague",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "61. I offer assistance toward a colleagues\n professional and personal development." )
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "respect", "prioverall", "respect",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "62. I always respect the rights and\n individuality of thought by colleagues and students." )
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "truthful", "prioverall", "truthful",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "63. I always represent information and actions in a truthful way." )
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "discloseCOI", "prioverall", "discloseCOI",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "64. I disclose conflicts of interest in\n the course of professional duties and activities." )
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "avoidoffensive", "prioverall", "avoidoffensive",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "65. I avoid offensive speech that offers\n unkind comments and unfair criticisms to others.")
+
+```
+
+### Research Experience
+
+<center>Research experience, seen on the y-axis, is measured on a Likert Scale of 0 to 5, where 0 = Has not changed at all, and 5 = Has changed a great deal.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "reschange", "prioverall", "reschange",
+                            x_limits = c(1, 5), y_limits = c(0, 5),
+                             main_title = "66. To what degree has your area of research changed in the past year?")
+```
+
+### Networking/Social Capital
+
+<center>Networking and social capital variables on the y-axis are measured on a Likert Scale of 0 to 10, where 0 = Not at all, 10 = Completely.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "sopitt", "prioverall", "sopitt",
+                            x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "82. To what extent are you and your work\n colleagues at your institution willing to help each other out?")
+```
+
+
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "soother", "prioverall", "soother",
+                            x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "83. To what extent are you and your work\n colleagues at other institutions willing to help each other out?")
+```
+
+
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "sofield", "prioverall", "sofield",
+                            x_limits = c(1, 5), y_limits = c(0, 10),
+                             main_title = "84. How well networked are you in your field?")
+```
+
+
+
+### Job Satisfaction
+
+<center>Job satisfaction variables on the y-axis are measured on a Likert Scale of 1 to 7, where 1 = Strongly disagree and 7 = Strongly agree.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "paidfair", "prioverall", "paidfair",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "85. I feel I am being paid a fair amount for the work I do.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "compsupervisor", "prioverall", "compsupervisor",
+                                       x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "86. My supervisor is quite competent in doing his/her job.")
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "recognition", "prioverall", "recognition",
+                             x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "87. When I do a good job, I receive\n the recognition for it that I should receive.")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "notblocked", "prioverall", "notblocked",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "88. My efforts to do a good job are seldom blocked\n by the rules and procedures of my institution.")
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "likecoworkers", "prioverall", "likecoworkers",
+                              x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "89. I like the people I work with.")
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "jobmeaningful", "prioverall", "jobmeaningful",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "90. I feel my job is meaningful.")
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "communications", "prioverall", "communications",
+                            x_limits = c(1, 5), y_limits = c(1, 7),
+                             main_title = "91. Communications are good within this organization.")
+
+
+```
+
+### Career Satisfaction
+
+<center>Career satisfaction variables on the y-axis are measured on a Likert Scale of 1 to 5, where 1 = Not satisfied, 5 = Very satisfied.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "direction", "prioverall", "direction",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "92. How satisfied are you with the\n direction in which your career is progressing?") 
+
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+create_scatter_plot_two_all("priaccess", "compensation", "prioverall", "compensation",
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "93. Do you think you are compensated appropriately for your position?") 
+
+```
+
+### Career Adapt-Abilities Inventory
+
+<center>Career Adat-Abilities Inventory variables on the y-axis are measured on a Likert Scale of 1 to 5. Scholars were provided with the following promt: Different people use different strength to build their careers. No one is good at everything, each of us emphasizes some strengths more than others. Please rate how strongly you have developed each of the following abilities using the scale below where 1 = Not strong and 5 = Strongest.</center>
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "thinkFuture", "prioverall", "thinkFuture", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "94. Thinking about what my future will be like")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "shapeFuture", "prioverall", "shapeFuture", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "95. Realizing that today’s choices shape my future")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "prepareFuture", "prioverall", "prepareFuture", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "96. Prepairing for the future")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "awareChoices", "prioverall", "awareChoices", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "97. Becoming aware of the educational\n and vocational choices that I must make")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "planToAchieve", "prioverall", "planToAchieve", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "98. Planning how to achieve my goals")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "careerConcern", "prioverall", "careerConcern", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "99. Concerned about my career")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "upbeat", "prioverall", "upbeat", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "100. Keeping upbeat")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "selfDecisions", "prioverall", "selfDecisions", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "101. Making decisions for myself")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "responsible", "prioverall", "responsible", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "102. Taking responsibility for my actions")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "beliefs", "prioverall", "beliefs", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "103. Sticking up for my beliefs")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "countOnSelf", "prioverall", "countOnSelf", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "104. Counting on myself")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "rightForSelf", "prioverall", "rightForSelf", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "105. Doing what’s right for me")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "surroundings", "prioverall", "surroundings", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "106. Exploring my surroundings")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "lookToGrow", "prioverall", "lookToGrow", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "107. Looking for opportunities to grow as a person")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "optionsPrechoice", "prioverall", "optionsPrechoice", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "108. Investigating options before making a choice")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "differentWays", "prioverall", "differentWays", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "109. Observing different ways of doing things")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "deepProbing", "prioverall", "deepProbing", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "110. Probing deeply into questions I have")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "curious", "prioverall", "curious", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "111. Becoming curious about new opportunities")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "efficient", "prioverall", "efficient", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "112. Performing tasks efficiently")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "doThingsWell", "prioverall", "doThingsWell", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "113. Taking care to do things well")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "learnSkills", "prioverall", "learnSkills", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "114. Learning new skills")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "workingUp", "prioverall", "workingUp", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "115. Working up to my ability")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "overcome", "prioverall", "overcome", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "116. Overcoming obstacles")
+```
+
+```{r, echo=FALSE, fig.align = 'center'}
+
+create_scatter_plot_two_all("priaccess", "solveProblems", "prioverall", "solveProblems", 
+                             x_limits = c(1, 5), y_limits = c(1, 5),
+                             main_title = "117. Solving problems")
+```

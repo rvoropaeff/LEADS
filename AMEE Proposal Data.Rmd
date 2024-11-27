@@ -1,0 +1,1555 @@
+---
+title: "AMEE Proposal - Med Ed Mini Module 2021 2022 Data"
+author: "Rebecca Voropaeff, Evaluation Coordinator"
+date: "2024-10-22"
+output:
+  pdf_document: 
+ 
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+```{r setup, include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+```
+
+<!-- load completion data -->
+```{r, echo=FALSE}
+
+completion_data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/enrollments.csv")
+
+```
+
+
+
+<!-- load data sets and label by module -->
+
+```{r, echo=FALSE}
+
+Teach_Ret_All_data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Teaching for Retention_October 18, 2024_09.33.csv") %>% mutate(module = "Teaching For Retention")
+
+Cur_Dev_Med_Ed_All_Data<- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Cur Dev Med Ed raw clean.csv")
+
+Teach_Clin_Reas_All_Data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Teaching Clinical Reasoning_October 18, 2024_09.50.csv")  %>% mutate(module = "Teaching Clinical Reasoning")
+
+Remed_Med_Know_Def_All_Data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Remediating Medical Knowledge Deficits_October 18, 2024_09.51.csv") %>% mutate(module = "Remediating Medical Knowledge Defecits")
+
+Effective_Mentoring_All_Data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Effective Mentoring_October 18, 2024_09.52.csv") %>% mutate(module = "Effective Mentoring")
+
+Effective_Feedback_All_Data <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Effective Feedback_October 18, 2024_09.53.csv") %>% mutate(module = "Effective Feedback")
+
+
+```
+
+<!-- import exception LONG data -->
+```{r, echo=FALSE}
+
+Rem_Med_long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Rem Med Know Def long clean.csv")
+
+Teach_Ret_Long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/teaching for Retention LONG.csv")
+
+Cur_Dev_Med_Ed_Long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Cur Dev Med Ed Long.csv")
+
+Teach_Clin_Reas_Long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Teach Clin Reas Long.csv")
+
+Effective_Feedback_Long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Effective Feedback long.csv")
+
+Effective_Mentoring_Long <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Effective Mentoring long.csv")
+
+```
+
+<!-- import raw clean numerated data -->
+
+```{r, echo=FALSE}
+
+Cur_Dev_Med_Ed_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Cur Dev Med Ed raw clean.csv")
+
+Effective_Feedback_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Effective Feedback raw clean.csv")
+
+Effective_Mentoring_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Effective Mentoring raw clean.csv")
+
+Rem_Med_Knowl_Def_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Remediating Medical Knowledge Deficits raw clean.csv")
+
+Teach_Clin_Reas_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Teaching Clinincal Reasonong raw clean.csv")
+
+Teach_For_Ret_raw_clean <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/clean raw/csv/Teaching for Retention raw clean.csv")
+```
+
+<!-- specify numeric and character values -->
+```{r, echo=FALSE}
+# Load necessary library
+library(dplyr)
+
+# Example function to convert columns in a data frame
+convert_columns <- function(df) {
+  df <- df %>%
+    mutate(
+      length = as.numeric(length),
+      pace = as.numeric(pace),
+      workload = as.numeric(workload),
+      content = as.numeric(content),
+      instructor = as.numeric(instructor),
+      recommend = as.numeric(recommend),
+      readings = as.numeric(readings),
+      video = as.numeric(videos),
+      discuss = as.numeric(discuss),
+      synch = as.numeric(synch),
+      valuable = as.character(valuable),
+      change = as.character(change),
+      use_info = as.character(use_info),
+      comment = as.character(comments),
+      Module = as.character(Module),
+    )
+  return(df)
+}
+
+# Apply the function to all data frames
+Cur_Dev_Med_Ed_raw_clean <- convert_columns(Cur_Dev_Med_Ed_raw_clean)
+Effective_Feedback_raw_clean <- convert_columns(Effective_Feedback_raw_clean)
+Effective_Mentoring_raw_clean <- convert_columns(Effective_Mentoring_raw_clean)
+Rem_Med_Knowl_Def_raw_clean <- convert_columns(Rem_Med_Knowl_Def_raw_clean)
+Teach_Clin_Reas_raw_clean <- convert_columns(Teach_Clin_Reas_raw_clean)
+Teach_For_Ret_raw_clean <- convert_columns(Teach_For_Ret_raw_clean)
+
+```
+
+
+
+
+<!-- combine datasets NOT NUMERATED data -->
+
+```{r, echo=FALSE}
+
+# Combine datasets
+combined_raw_clean <- bind_rows(Cur_Dev_Med_Ed_raw_clean, Effective_Feedback_raw_clean, Effective_Mentoring_raw_clean, Rem_Med_Knowl_Def_raw_clean, Teach_Clin_Reas_raw_clean, Teach_For_Ret_raw_clean)
+
+```
+
+
+
+<!-- load data tables -->
+
+```{r, echo=FALSE}
+
+Effective_Mentoring_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Effective_Mentoring_1_Table.csv")
+
+Effective_mentoring_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Effective_Mentoring_2_Tables.csv")
+
+Teach_Clin_Reas_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Teaching_Clinical_Reasonging_Table.csv")
+
+Teach_Clin_Reas_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Teaching_Clinical_Reasoning2_Table.csv")
+
+Effective_Feedback_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Effective_Feedback_Table.csv")
+
+Effective_Feedback_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Effective_Feedback_2_Table.csv")
+
+Curr_Dev_Med_Ed_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Curr_Dev_Med_Ed_1_Table.csv")
+
+Curr_Dev_Med_Ed_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Curr_Dev_Med_Ed_2_Table.csv")
+
+Rem_Med_Knowl_Def_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Remediating_Medical_Knowledge_Defecits_1_Table.csv")
+
+Rem_Med_Knowl_Def_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Remediating_Medical_Knowledge_Defecits_2_Table.csv")
+
+Teach_For_Ret_1_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Teaching_For_Retention_1_Table.csv")
+
+Teach_For_Ret_2_Table <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/Tables/Teaching_For_Retention_2_Table.csv")
+```
+
+<!-- import variable key -->
+
+```{r, echo=FALSE}
+
+variable_key <- read.csv("C:/Users/REV47/OneDrive - University of Pittsburgh/Desktop/AMEE raw reports/variable key.csv")
+
+```
+
+
+
+<!-- creation completion data table -->
+```{r, echo=FALSE}
+
+library(knitr)
+library(kableExtra)
+
+# Create the table with a caption and wider columns
+knitr::kable(completion_data, 
+             caption = "ENROLLMENT DATA", 
+             col.names = c('Module', '# of enrollments')) %>%
+  kable_styling(full_width = TRUE, position = "center") %>%
+  column_spec(1, width = "11cm") %>%  # Adjust width for the first column
+  column_spec(2, width = "5cm")      # Adjust width for the second column
+
+```
+
+
+<!-- create variable key table -->
+```{r, echo=FALSE}
+
+library(knitr)
+library(kableExtra)
+
+# Create the table with a caption and without stripes
+knitr::kable(variable_key, 
+             caption = "VARIABLE KEY", 
+             col.names = c('Variable', 
+                           'Please rate your level of agreement with the following statement:')) 
+
+```
+
+\newpage
+
+
+
+\begin{center}
+\Huge \textcolor{blue}{Combined Summary - All Modules}
+\\
+\normalsize \textnormal{where 1 = Strongly Disagree and 5 = Strongly Agree}
+\end{center}
+
+
+
+
+<!-- create summary table for the mean -->
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Calculate summary statistics for each module
+summary_table <- combined_raw_clean %>%
+  group_by(Module) %>%  # Group by the Module column
+  summarise(
+    content = mean(content, na.rm = TRUE),  # Calculate mean
+    length = mean(length, na.rm = TRUE),
+    pace = mean(pace, na.rm = TRUE),
+    workload = mean(workload, na.rm = TRUE),
+    instructor = mean(instructor, na.rm = TRUE),
+    recommend = mean(recommend, na.rm = TRUE),
+    n = n(),  # Count of unaggregated values
+    .groups = 'drop'  # Prevent grouping issues for subsequent calculations
+  )
+
+# Calculate overall means without grouping
+overall_means <- combined_raw_clean %>%
+  summarise(
+    content = mean(content, na.rm = TRUE),
+    length = mean(length, na.rm = TRUE),
+    pace = mean(pace, na.rm = TRUE),
+    workload = mean(workload, na.rm = TRUE),
+    instructor = mean(instructor, na.rm = TRUE),
+    recommend = mean(recommend, na.rm = TRUE),
+    n = n()  # Total count of values
+  )
+
+# Create a total row
+total_row <- data.frame(
+  Module = "Total",  # Label for the total row
+  content = overall_means$content,
+  length = overall_means$length,
+  pace = overall_means$pace,
+  workload = overall_means$workload,
+  instructor = overall_means$instructor,
+  recommend = overall_means$recommend,
+  n = overall_means$n  # Include count in total row
+)
+
+# Create the final table
+final_table_mean <- bind_rows(summary_table, total_row)
+
+# Format numerical values to two decimal points
+final_table_mean <- final_table_mean %>%
+  mutate(across(where(is.numeric), ~ round(., 2)))
+
+# Print the final table using kable with horizontal stripes in rows
+final_table_mean %>%
+  kable(caption = "SUMMARY OF MODULE MEANS", 
+        align = 'c', escape = FALSE) %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0, align = 'c') %>%  # Center the header
+  column_spec(1, width = "5em", latex_column_spec = "p{5cm}") %>%
+  row_spec(seq(1, nrow(final_table_mean), by = 2), background = "#f2f2f2")  # Horizontal stripe
+
+```
+
+
+
+
+
+
+
+
+  
+<!-- median -->
+```{r, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Calculate summary statistics for each module
+summary_table <- combined_raw_clean %>%
+  group_by(Module) %>%  # Group by the Module column
+  summarise(
+    content = median(content, na.rm = TRUE),  # Calculate median
+    length = median(length, na.rm = TRUE),
+    pace = median(pace, na.rm = TRUE),
+    workload = median(workload, na.rm = TRUE),
+    instructor = median(instructor, na.rm = TRUE),
+    recommend = median(recommend, na.rm = TRUE),
+    n = n(),  # Count of unaggregated values
+    .groups = 'drop'  # Prevent grouping issues for subsequent calculations
+  )
+
+# Calculate overall medians without grouping
+overall_medians <- combined_raw_clean %>%
+  summarise(
+    content = median(content, na.rm = TRUE),
+    length = median(length, na.rm = TRUE),
+    pace = median(pace, na.rm = TRUE),
+    workload = median(workload, na.rm = TRUE),
+    instructor = median(instructor, na.rm = TRUE),
+    recommend = median(recommend, na.rm = TRUE),
+    n = n()  # Total count of values
+  )
+
+# Create a total row
+total_row <- data.frame(
+  Module = "Total",  # Label for the total row
+  content = overall_medians$content,
+  length = overall_medians$length,
+  pace = overall_medians$pace,
+  workload = overall_medians$workload,
+  instructor = overall_medians$instructor,
+  recommend = overall_medians$recommend,
+  n = overall_medians$n  # Include count in total row
+)
+
+# Create the final table
+final_table_median <- bind_rows(summary_table, total_row)
+
+# Format numerical values to two decimal points
+final_table_median <- final_table_median %>%
+  mutate(across(where(is.numeric), ~ round(., 2)))
+
+# Print the final table using kable with horizontal stripes in rows
+final_table_median %>%
+  kable(caption = "SUMMARY OF MODULE MEDIANS", 
+        align = 'c', escape = FALSE) %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0, align = 'c') %>%  # Center the header
+  column_spec(1, width = "5em", latex_column_spec = "p{5cm}") %>%
+  row_spec(seq(1, nrow(final_table_median), by = 2), background = "#f2f2f2")  # Horizontal stripes in rows
+
+```
+
+
+
+<!-- SD -->
+```{r, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Calculate summary statistics for each module
+summary_table <- combined_raw_clean %>%
+  group_by(Module) %>%
+  summarise(
+    content = sd(content, na.rm = TRUE),
+    length = sd(length, na.rm = TRUE),
+    pace = sd(pace, na.rm = TRUE),
+    workload = sd(workload, na.rm = TRUE),
+    instructor = sd(instructor, na.rm = TRUE),
+    recommend = sd(recommend, na.rm = TRUE),
+    n = n(),
+    .groups = 'drop'
+  )
+
+# Calculate overall standard deviations without grouping
+overall_sd <- combined_raw_clean %>%
+  summarise(
+    content = sd(content, na.rm = TRUE),
+    length = sd(length, na.rm = TRUE),
+    pace = sd(pace, na.rm = TRUE),
+    workload = sd(workload, na.rm = TRUE),
+    instructor = sd(instructor, na.rm = TRUE),
+    recommend = sd(recommend, na.rm = TRUE),
+    n = n()
+  )
+
+# Create a total row
+total_row <- data.frame(
+  Module = "Total",  # Label for the total row
+  content = overall_sd$content,
+  length = overall_sd$length,
+  pace = overall_sd$pace,
+  workload = overall_sd$workload,
+  instructor = overall_sd$instructor,
+  recommend = overall_sd$recommend,
+  n = overall_sd$n
+)
+
+# Create the final table
+final_table_sd <- bind_rows(summary_table, total_row)
+
+# Format numerical values to two decimal points
+final_table_sd <- final_table_sd %>%
+  mutate(across(where(is.numeric), ~ round(., 2)))
+
+# Print the final table using kable with horizontal stripes in rows
+final_table_sd %>%
+  kable(caption = "SUMMARY OF MODULE STANDARD DEVIATIONS", 
+        align = 'c', escape = FALSE) %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0, align = 'c') %>%  # Center the header
+  column_spec(1, width = "5em", latex_column_spec = "p{5cm}") %>%
+  row_spec(seq(1, nrow(final_table_sd), by = 2), background = "#f2f2f2")  # Horizontal stripes in rows
+
+```
+
+\newpage 
+
+<!-- Variance -->
+
+```{r, echo=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Calculate summary statistics for each module
+summary_table <- combined_raw_clean %>%
+  group_by(Module) %>%
+  summarise(
+    content = var(content, na.rm = TRUE),
+    length = var(length, na.rm = TRUE),
+    pace = var(pace, na.rm = TRUE),
+    workload = var(workload, na.rm = TRUE),
+    instructor = var(instructor, na.rm = TRUE),
+    recommend = var(recommend, na.rm = TRUE),
+    n = n(),
+    .groups = 'drop'
+  )
+
+# Calculate overall variance without grouping
+overall_variance <- combined_raw_clean %>%
+  summarise(
+    content = var(content, na.rm = TRUE),
+    length = var(length, na.rm = TRUE),
+    pace = var(pace, na.rm = TRUE),
+    workload = var(workload, na.rm = TRUE),
+    instructor = var(instructor, na.rm = TRUE),
+    recommend = var(recommend, na.rm = TRUE),
+    n = n()
+  )
+
+# Create a total row
+total_row <- data.frame(
+  Module = "Total",  # Label for the total row
+  content = overall_variance$content,
+  length = overall_variance$length,
+  pace = overall_variance$pace,
+  workload = overall_variance$workload,
+  instructor = overall_variance$instructor,
+  recommend = overall_variance$recommend,
+  n = overall_variance$n
+)
+
+# Create the final table
+final_table_variance <- bind_rows(summary_table, total_row)
+
+# Format numerical values to two decimal points
+final_table_variance <- final_table_variance %>%
+  mutate(across(where(is.numeric), ~ round(., 2)))
+
+# Print the final table using kable with horizontal stripes in rows
+final_table_variance %>%
+  kable(caption = "SUMMARY OF MODULE VARIANCES", 
+        align = 'c', escape = FALSE) %>%
+  kable_styling(full_width = FALSE) %>%
+  row_spec(0, align = 'c') %>%  # Center the header
+  column_spec(1, width = "5em", latex_column_spec = "p{5cm}") %>%
+  row_spec(seq(1, nrow(final_table_variance), by = 2), background = "#f2f2f2")  # Horizontal stripes in rows
+```
+
+\newpage
+
+
+
+\begin{center}
+\Huge \textcolor{blue}{Curriculum Development in Medical Education}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+<!-- create function for new raw data summary table -->
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Cur_Dev_Med_Ed_raw_clean_summary <- Cur_Dev_Med_Ed_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Cur_Dev_Med_Ed_raw_clean_summary <- Cur_Dev_Med_Ed_raw_clean_summary %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend"))
+
+
+```
+
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+library(kableExtra)
+
+Cur_Dev_Med_Ed_raw_clean_summary %>%
+  kable(caption = "Curriculum Development in Medical Education Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+
+```
+
+
+<!-- print corected raw data summary table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Cur_Dev_Med_Ed_Long, caption = "Curriculum Development in Medical Education Module 2021-2022 Descriptive Statistics", 
+ col.names = c('Variable', 'Strongly Agree','Agree', 'Neutral', 'Disagree','Strongly disagree')
+ )
+
+
+
+
+```
+<!-- add percentages to table -->
+
+
+```{r, echo=FALSE}
+
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# Sample data frame
+Cur_Dev_Med_Ed_Long_summary <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_disagree = c(6, 6, 6, 5, 7, 7),
+  Disagree = c(3, 3, 3, 4, 2, 2),
+  Neutral = c(0, 0, 0, 0, 0, 0),
+  Agree = c(0, 0, 0, 0, 0, 0),
+  Strongly_agree = c(0, 0, 0, 0, 0, 0)
+)
+
+# Calculate the total responses for each variable
+Cur_Dev_Med_Ed_Long_summary <- Cur_Dev_Med_Ed_Long %>%
+  mutate(Total = rowSums(across(Strongly.disagree:Strongly.agree))) %>%
+  mutate(across(Strongly.disagree:Strongly.agree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(-Total)  # Remove the Total column
+
+# Create the kable with the adjusted summary table
+Cur_Dev_Med_Ed_Long_summary %>%
+  kable(caption = "Curriculum Development in Medical Education Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+```
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Curr_Dev_Med_Ed_1_Table, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", align = "llcccccc",
+             col.names = c('X', 'Field', 'Min', 'Max', 'Mean', 'S.D.', 'Variance', 'n')
+) 
+```
+
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Curr_Dev_Med_Ed_2_Table, caption = "SUMMARY OF MODULE RAW DATA", align = "lllllrlrlrlrr",
+ col.names = c('X', 'Question', 'Strongly disagree', 'n', 'Dis-agree', 'n', 'Neut-ral', 'n', 'Agree', 'n', 'Strongly agree', 'n', 'Total')
+ ) 
+
+```
+\newpage
+
+
+
+\begin{center}
+\Huge \textcolor{blue}{Remediating Medical Knowledge Deficits}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+
+
+
+
+<!-- create function for new raw data summary table -->
+```{r, echo=FALSE}
+
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Rem_Med_Summary_Table <- Rem_Med_Knowl_Def_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Rem_Med_Summary_Table <- Rem_Med_Summary_Table %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend")) 
+
+```
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+
+library(kableExtra)
+
+Rem_Med_Summary_Table %>%
+  kable(caption = "Remediating Medical Knowledge Deficits Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+```
+
+<!-- print corected raw data summary table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Rem_Med_long, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", 
+ col.names = c('Variable', 'Strongly agree','Agree', 'Neutral', 'Disgree','Strongly disagree')
+ )
+
+
+
+
+```
+<!-- add percentages to table -->
+
+
+```{r, echo=FALSE}
+
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Sample data frame
+Rem_Med_long <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_disagree = c(2, 3, 2, 5, 4, 5),
+  Disagree = c(3, 2, 3, 0, 1, 0),
+  Neutral = c(0, 0, 0, 0, 0, 0),
+  Agree = c(0, 0, 0, 0, 0, 0),
+  Strongly_agree = c(0, 0, 0, 0, 0, 0)
+)
+
+# Calculate the total responses for each variable
+Rem_Med_long_summary <- Rem_Med_long %>%
+  mutate(Total = rowSums(across(Strongly_disagree:Strongly_agree))) %>%
+  mutate(across(Strongly_disagree:Strongly_agree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(-Total)  # Remove the Total column
+
+
+# Create the kable with the adjusted summary table
+Rem_Med_long_summary %>%
+  kable(caption = "Remediating Medical Knowledge Deficits Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+
+
+
+```
+
+
+\newpage
+
+
+
+\begin{center}
+\Huge \textcolor{blue}{Teaching For Retention}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+<!-- create function for new raw data summary table -->
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Teach_Ret_Summary_Table <- Teach_For_Ret_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Teach_Ret_Summary_Table <- Teach_Ret_Summary_Table %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend"))
+
+
+```
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+
+library(kableExtra)
+
+Teach_Ret_Summary_Table %>%
+  kable(caption = "Teaching for Retention Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+
+```
+
+<!-- print corrected raw table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Teach_Ret_Long, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", 
+ col.names = c('X', 'Strongly disagree','Disagree', 'Neutral', 'Agree','Strongly agree')
+ )
+
+
+
+```
+
+
+
+<!-- add percentages -->
+```{r, echo=FALSE}
+
+library(dplyr)
+library(knitr)
+
+# Define the data frame with your specific counts
+Teach_Ret_Long <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_disagree = c(2, 2, 2, 1, 2, 2),  # Your counts
+  Disagree = c(1, 1, 1, 2, 1, 1),          # Your counts
+  Neutral = c(0, 0, 0, 0, 0, 0),           # Your counts
+  Agree = c(0, 0, 0, 0, 0, 0),             # Your counts
+  Strongly_agree = c(0, 0, 0, 0, 0, 0)     # Your counts
+)
+
+# Calculate total responses for each variable and format counts with percentages
+Teach_Ret_Long_summary <- Teach_Ret_Long %>%
+  mutate(Total = rowSums(across(Strongly_disagree:Strongly_agree))) %>%
+  mutate(across(Strongly_disagree:Strongly_agree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(Variable, Strongly_disagree, Disagree, Neutral, Agree, Strongly_agree) %>%
+  rename('Strongly Disagree' = Strongly_disagree,
+         'Disagree' = Disagree,
+         'Neutral' = Neutral,
+         'Agree' = Agree,
+         'Strongly Agree' = Strongly_agree)
+
+
+# Create the kable with the adjusted summary table
+Teach_Ret_Long_summary %>%
+  kable(caption = "Teaching for Retention Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+             
+```
+             
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Teach_For_Ret_1_Table, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", align = "llcccccc",
+             col.names = c('X', 'Field', 'Min', 'Max', 'Mean', 'S.D.', 'Variance', 'n')
+             ) 
+
+```
+
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Teach_For_Ret_2_Table, caption = "SUMMARY OF MODULE RAW DATA", align = "lllllrlrlrlrr",
+ col.names = c('X', 'Question', 'Strongly disagree', 'n', 'Dis-agree', 'n', 'Neut-ral', 'n', 'Agree', 'n', 'Strongly agree', 'n', 'Total')
+ )
+
+```
+
+
+
+\newpage
+\begin{center}
+\Huge \textcolor{blue}{Teaching Clinincal Reasoning}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+
+<!-- create function for new raw data summary table -->
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Teach_Clin_Reas_raw_clean_summary <- Teach_Clin_Reas_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Teach_Clin_Reas_raw_clean_summary <- Teach_Clin_Reas_raw_clean_summary %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend"))
+
+
+```
+
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+
+library(kableExtra)
+
+Teach_Clin_Reas_raw_clean_summary %>%
+  kable(caption = "Teaching Clinical Reasoning Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+
+```
+
+
+
+
+
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Teach_Clin_Reas_1_Table, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", align = "llcccccc",
+             col.names = c('X', 'Field', 'Min', 'Max', 'Mean', 'S.D.', 'Variance', 'n')
+             ) 
+
+```
+
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Teach_Clin_Reas_2_Table, caption = "SUMMARY OF MODULE RAW DATA", align = "lllllrlrlrlrr",
+ col.names = c('X', 'Question', 'Strongly disagree', 'n', 'Dis-agree', 'n', 'Neut-ral', 'n', 'Agree', 'n', 'Strongly agree', 'n', 'Total')
+ ) 
+
+```
+
+<!-- print corected raw data summary table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Teach_Clin_Reas_Long, caption = "Curriculum Development in Medical Education Module 2021-2022 Descriptive Statistics", 
+ col.names = c('Variable', 'Strongly disagree','Disagree', 'Neutral', 'Agree','Strongly agree')
+ )
+
+
+
+
+```
+<!-- add percentages to table -->
+
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Data frame with your specified counts
+Teach_Clin_Reas_Long <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_disagree = c(6, 6, 6, 5, 7, 7),
+  Disagree = c(3, 3, 3, 4, 2, 2),
+  Neutral = c(0, 0, 0, 0, 0, 0),
+  Agree = c(0, 0, 0, 0, 0, 0),
+  Strongly_agree = c(0, 0, 0, 0, 0, 0)
+)
+
+# Calculate the total responses for each variable
+Cur_Dev_Med_Ed_Long_summary <- Teach_Clin_Reas_Long %>%
+  mutate(Total = rowSums(across(Strongly_disagree:Strongly_agree))) %>%
+  mutate(across(Strongly_disagree:Strongly_agree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(-Total)  # Remove the Total column
+
+
+# Create the kable with the adjusted summary table
+Cur_Dev_Med_Ed_Long_summary %>%
+  kable(caption = "Curriculum Development in Medical Education Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+
+
+```
+
+
+
+
+
+\newpage
+\begin{center}
+\Huge \textcolor{blue}{Effective Feedback}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+
+
+<!-- create function for new raw data summary table -->
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Effective_Feedback_raw_clean_summary <- Effective_Feedback_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Effective_Feedback_raw_clean_summary <- Effective_Feedback_raw_clean_summary %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend"))
+
+
+```
+
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+
+library(kableExtra)
+
+Effective_Feedback_raw_clean_summary %>%
+  kable(caption = "Effective Feedback Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+
+```
+
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Effective_Feedback_1_Table, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", align = "llcccccc",
+             col.names = c('X', 'Field', 'Min', 'Max', 'Mean', 'S.D.', 'Variance', 'n')
+             ) 
+
+```
+
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Effective_Feedback_2_Table, caption = "SUMMARY OF MODULE RAW DATA", align = "lllllrlrlrlrr",
+ col.names = c('X', 'Question', 'Strongly disagree', 'n', 'Dis-agree', 'n', 'Neut-ral', 'n', 'Agree', 'n', 'Strongly agree', 'n', 'Total')
+ ) 
+
+```
+
+<!-- print corected raw data summary table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Effective_Feedback_Long, caption = "Effective Feedback Module 2021-2022 Frequency Table", 
+ col.names = c('Variable', 'Strongly Agree','Agree', 'Neutral', 'Disagree','Strongly disagree')
+ )
+
+
+
+
+```
+<!-- add percentages to table -->
+
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Data frame with your specified counts
+Effective_Feedback_Long <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_agree = c(0, 0, 0, 0, 1, 1),
+  Agree = c(2, 2, 2, 2, 0, 0),
+  Neutral = c(0, 0, 0, 0, 0, 1),
+  Disagree = c(0, 0, 0, 0, 1, 0),
+  Strongly_disagree = c(0, 0, 0, 0, 0, 0)
+)
+
+# Calculate the total responses for each variable
+Effective_Feedback_summary <- Effective_Feedback_Long %>%
+  mutate(Total = rowSums(across(Strongly_agree:Strongly_disagree))) %>%
+  mutate(across(Strongly_agree:Strongly_disagree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(-Total)  # Remove the Total column
+
+
+# Create the kable with the adjusted summary table
+Effective_Feedback_summary %>%
+  kable(caption = "Effective Feedback Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+
+```
+
+
+
+
+
+\newpage
+\begin{center}
+\Huge \textcolor{blue}{Effective Mentoring}
+\end{center}
+
+**Please rate your level of agreement with the following statements, where 1 = Strongly Disagree and 5 = Strongly agree**
+
+
+<!-- create function for new raw data summary table -->
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Summarizing the data and transforming the format
+Effective_Mentoring_raw_clean_summary <- Effective_Mentoring_raw_clean %>%
+  summarise(
+    length_min = round(min(length, na.rm = TRUE), 2),
+    length_max = round(max(length, na.rm = TRUE), 2),
+    length_mean = round(mean(length, na.rm = TRUE), 2),
+    length_median = round(median(length, na.rm = TRUE), 2),
+    length_var = round(var(length, na.rm = TRUE), 2),
+    length_sd = round(sd(length, na.rm = TRUE), 2),
+    length_n = n(),
+    
+    pace_min = round(min(pace, na.rm = TRUE), 2),
+    pace_max = round(max(pace, na.rm = TRUE), 2),
+    pace_mean = round(mean(pace, na.rm = TRUE), 2),
+    pace_median = round(median(pace, na.rm = TRUE), 2),
+    pace_var = round(var(pace, na.rm = TRUE), 2),
+    pace_sd = round(sd(pace, na.rm = TRUE), 2),
+    pace_n = n(),
+    
+    workload_min = round(min(workload, na.rm = TRUE), 2),
+    workload_max = round(max(workload, na.rm = TRUE), 2),
+    workload_mean = round(mean(workload, na.rm = TRUE), 2),
+    workload_median = round(median(workload, na.rm = TRUE), 2),
+    workload_var = round(var(workload, na.rm = TRUE), 2),
+    workload_sd = round(sd(workload, na.rm = TRUE), 2),
+    workload_n = n(),
+    
+    content_min = round(min(content, na.rm = TRUE), 2),
+    content_max = round(max(content, na.rm = TRUE), 2),
+    content_mean = round(mean(content, na.rm = TRUE), 2),
+    content_median = round(median(content, na.rm = TRUE), 2),
+    content_var = round(var(content, na.rm = TRUE), 2),
+    content_sd = round(sd(content, na.rm = TRUE), 2),
+    content_n = n(),
+    
+    instructor_min = round(min(instructor, na.rm = TRUE), 2),
+    instructor_max = round(max(instructor, na.rm = TRUE), 2),
+    instructor_mean = round(mean(instructor, na.rm = TRUE), 2),
+    instructor_median = round(median(instructor, na.rm = TRUE), 2),
+    instructor_var = round(var(instructor, na.rm = TRUE), 2),
+    instructor_sd = round(sd(instructor, na.rm = TRUE), 2),
+    instructor_n = n(),
+    
+    recommend_min = round(min(recommend, na.rm = TRUE), 2),
+    recommend_max = round(max(recommend, na.rm = TRUE), 2),
+    recommend_mean = round(mean(recommend, na.rm = TRUE), 2),
+    recommend_median = round(median(recommend, na.rm = TRUE), 2),
+    recommend_var = round(var(recommend, na.rm = TRUE), 2),
+    recommend_sd = round(sd(recommend, na.rm = TRUE), 2),
+    recommend_n = n()
+  ) %>%
+  pivot_longer(everything(), names_to = c("variable", "stat"), names_sep = "_", values_to = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+# Adjusting the variable names for clarity
+Effective_Mentoring_raw_clean_summary <- Effective_Mentoring_raw_clean_summary %>%
+  mutate(variable = recode(variable,
+                           length = "length",
+                           pace = "pace",
+                           workload = "workload",
+                           instructor_mean = "instructor",
+                           recommend_mean = "recommend"))
+
+
+```
+
+
+<!-- execute properly formated function to print knitr table -->
+```{r, echo=FALSE}
+
+
+library(kableExtra)
+
+Effective_Mentoring_raw_clean_summary %>%
+  kable(caption = "Effective Mentoring Module 2021-2022 Descriptive Statistics", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lccccccc", # Center align all columns
+        col.names = c('Variable', 'Min', 'Max', 'Mean', 'Median', 'Var', 'SD', 'n')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:5, width = "2cm")    # Adjust the width for columns 2 to 5
+
+
+```
+
+
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Effective_Mentoring_1_Table, caption = "SUMMARY OF MODULE DESCRIPTIVE DATA", align = "llcccccc",
+             col.names = c('', 'Field', 'Min', 'Max', 'Mean', 'S.D.', 'Variance', 'n')
+             ) 
+```
+
+
+```{r, echo=FALSE, results='hide'}
+
+knitr::kable(Effective_mentoring_2_Table, caption = "SUMMARY OF MODULE RAW DATA", align = "lllllrlrlrlrr",
+ col.names = c('X', 'Question', 'Strongly disagree', 'n', 'Dis-agree', 'n', 'Neut-ral', 'n', 'Agree', 'n', 'Strongly agree', 'n', 'Total')
+)
+
+```
+
+
+
+
+
+
+<!-- print corected raw data summary table -->
+```{r, echo=FALSE, results='hide'}
+
+
+
+knitr::kable(Effective_Mentoring_Long, caption = "Effective Mentoring Module 2021-2022 Descriptive Statistics", 
+ col.names = c('Variable', 'Strongly Agree','Agree', 'Neutral', 'Disagree','Strongly disagree')
+ )
+
+
+
+
+```
+<!-- add percentages to table -->
+
+
+```{r, echo=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Data frame with your specified counts
+Effective_Mentoring_Long <- data.frame(
+  Variable = c("length", "pace", "workload", "content", "instructor", "recommend"),
+  Strongly_agree = c(3, 4, 4, 4, 4, 4),
+  Agree = c(1, 0, 0, 0, 0, 0),
+  Neutral = c(0, 0, 0, 0, 0, 0),
+  Disagree = c(0, 0, 0, 0, 0, 0),
+  Strongly_disagree = c(0, 0, 0, 0, 0, 0)
+)
+
+# Calculate the total responses for each variable
+Effective_Mentoring_summary <- Effective_Mentoring_Long %>%
+  mutate(Total = rowSums(across(Strongly_agree:Strongly_disagree))) %>%
+  mutate(across(Strongly_agree:Strongly_disagree, 
+                ~ paste0(.x, " (", round(.x / Total * 100, 1), "%)"))) %>%
+  select(-Total)  # Remove the Total column
+
+
+# Create the kable with the adjusted summary table
+Effective_Mentoring_summary %>%
+  kable(caption = "Effective Mentoring Module 2021-2022 Frequency Table", 
+        format = "latex", 
+        booktabs = TRUE, 
+        align = "lcccccc",  # Adjusted to match the number of columns
+        col.names = c('Variable', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree')) %>%  # Specify column names here
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "3cm") %>%  # Adjust the width for the first column
+  column_spec(2:6, width = "2cm")    # Adjust the width for columns 2 to 6
+
+```
+
+
+

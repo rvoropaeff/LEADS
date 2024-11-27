@@ -1,0 +1,17 @@
+{
+  "hash": "34a27996990ff2e8221516aa569cc61f",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"LEADS_clean_new\"\nauthor: \"Rebecca Voropaeff\"\nformat: pdf\n---\n\n\n## Quarto\n\nQuarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>\n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output .cell-output-stdout}\n\n```\nburnout descriptive statistics\n```\n\n\n:::\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n\n\n|surveytype | Count|     Mean| Median|        SD| Min| Max|\n|:----------|-----:|--------:|------:|---------:|---:|---:|\n|Baseline   |    91| 2.373626|      2| 1.0397473|   1|   5|\n|Exit       |    72| 2.555556|      2| 1.0732193|   1|   5|\n|Alumni     |    99| 2.616162|      2| 0.9970064|   1|   5|\n\n\n:::\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](LEADS_clean_new_files/figure-pdf/unnamed-chunk-21-1.pdf)\n:::\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](LEADS_clean_new_files/figure-pdf/unnamed-chunk-22-1.pdf)\n:::\n:::\n",
+    "supporting": [
+      "LEADS_clean_new_files\\figure-pdf"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": null,
+    "postProcess": false
+  }
+}
